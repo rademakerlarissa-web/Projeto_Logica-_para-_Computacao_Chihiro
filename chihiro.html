@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Viagem de Chihiro · Kit de Lógica</title>
+<!-- Fontes do Google Fonts (precisam de internet; há fontes reserva no CSS) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Shippori+Mincho:wght@600;800&display=swap" rel="stylesheet">
+<style>
+/* ============ TEMA ESCURO (noite na casa de banhos) ============
+   Para mudar as cores do site inteiro, edite só estas variáveis. */
+:root{
+  --bg:#14172b;      /* fundo da página */
+  --card:#1d2140;    /* fundo dos painéis */
+  --card2:#272c55;   /* fundo de elementos dentro dos painéis */
+  --ink:#ece4d1;     /* texto principal */
+  --dim:#9a9bb5;     /* texto secundário */
+  --forest:#2f7f6c;  /* verde: verdadeiro / botões */
+  --teal:#7fc6b8;    /* verde claro: títulos e ✓ */
+  --red:#d4574a;     /* vermelho: falso / erro */
+  --gold:#f2b35a;    /* dourado de lanterna: destaques */
+  --line:#363b6b     /* bordas */
+}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font:17px/1.6 'Nunito',system-ui,sans-serif;background:var(--bg)}
+h1,h2{font-family:'Shippori Mincho',Georgia,serif;margin:0}
+
+/* ---- Cabeçalho: céu noturno com lua e brilho de lanterna ---- */
+.hero{position:relative;overflow:hidden;text-align:center;padding:64px 20px 100px;color:#fff;
+  background:radial-gradient(circle at 80% 22%,#f6e7b8 0 26px,#f6e7b855 27px 70px,transparent 72px), /* lua */
+             linear-gradient(#0d1030,#2d2a58 60%,#6b3f5c)}
+.hero::before,.hero::after{content:"";position:absolute;background:#8f86c4;border-radius:50%;filter:blur(26px);opacity:.28} /* nuvens */
+.hero::before{width:380px;height:90px;left:-60px;top:50px}
+.hero::after{width:460px;height:110px;right:-90px;top:110px}
+.hero>*{position:relative;z-index:1}
+.hero small{letter-spacing:.2em;text-transform:uppercase;font-size:13px;font-weight:800;color:var(--gold)}
+.hero h1{font-size:clamp(34px,6vw,58px);text-shadow:0 2px 18px #f2b35a66;margin:6px 0 10px}
+.hero p{max-width:640px;margin:0 auto;font-size:18px;color:#e4dcf0}
+.hero .hill{position:absolute;z-index:0;left:0;right:0;bottom:-1px;height:70px; /* colinas que ligam o céu ao fundo */
+  background:radial-gradient(ellipse 60% 100% at 22% 100%,var(--bg) 98%,transparent),radial-gradient(ellipse 50% 90% at 80% 100%,var(--bg) 98%,transparent)}
+
+/* ---- Layout geral e painéis ---- */
+main{max-width:1060px;margin:-34px auto 0;padding:0 18px 40px;position:relative}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:26px 28px;margin:24px 0;box-shadow:0 10px 30px #00000055}
+h2{font-size:26px;color:var(--teal)}
+h2 span{display:inline-grid;place-items:center;width:34px;height:34px;margin-right:10px;border-radius:50%;background:var(--gold);color:#2a1d05;font:800 17px 'Nunito',sans-serif;vertical-align:3px} /* número da seção */
+.lead{color:var(--dim);margin:6px 0 14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 18px}
+
+/* ---- Botões ---- */
+.btn{font:800 14px 'Nunito',sans-serif;border:0;border-radius:99px;padding:9px 18px;cursor:pointer;background:var(--gold);color:#2a1d05;transition:transform .2s}
+.btn.alt{background:var(--card2);color:var(--ink)}   /* botão não selecionado */
+.btn:hover{transform:translateY(-2px)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px} /* foco visível para quem usa teclado */
+
+/* ---- Cartões das variáveis ---- */
+#vars{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:18px}
+.card{background:var(--card2);border:2px solid var(--line);border-radius:18px;overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.card.on{border-color:var(--teal);box-shadow:0 0 18px #7fc6b829}     /* variável verdadeira */
+.card.off{border-color:#7a3f45}                                       /* variável falsa */
+.ph{display:grid;place-items:center;aspect-ratio:4/3;cursor:pointer;overflow:hidden;background:linear-gradient(135deg,#2f3a63,#4a3552);transition:filter .4s} /* espaço da imagem */
+.card.off .ph{filter:grayscale(.85) brightness(.75)}                  /* imagem apagada quando falsa */
+.ph img{display:none;width:100%;height:100%;object-fit:cover}         /* a imagem só aparece se carregar (classe .has) */
+.ph.has img{display:block}.ph.has .em{display:none}.em{font-size:54px}  /* emoji de reserva */
+.bd{position:relative;padding:14px 12px 12px}
+.bd p{margin:0 0 10px;font-size:14px;line-height:1.4;min-height:3.9em}
+.lt{position:absolute;right:12px;top:-17px;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:var(--gold);color:#2a1d05;font:800 17px 'Shippori Mincho',serif;border:3px solid var(--card2)} /* letra da variável */
+.tg{width:100%;border:0;border-radius:99px;padding:7px;font:800 13px 'Nunito',sans-serif;color:#fff;cursor:pointer}
+.on .tg{background:var(--forest)}.off .tg{background:var(--red)}
+
+/* ---- Fórmulas, restrições e resultados ---- */
+code{font:14px ui-monospace,Menlo,Consolas,monospace;background:#0f1226;color:#f6dca4;border-radius:6px;padding:2px 7px;overflow-wrap:anywhere}
+.rules{list-style:none;padding:0;margin:8px 0}
+.rules li{display:flex;gap:12px;align-items:flex-start;padding:10px 14px;margin:8px 0;border-radius:12px;border-left:5px solid}
+.rules li.ok{background:#1c3a3a;border-color:var(--teal)}   /* restrição respeitada */
+.rules li.no{background:#42232f;border-color:var(--red)}    /* restrição quebrada */
+.rules .mk{font-weight:800;font-size:20px}.rules small{display:block;color:var(--dim)}
+.chip{display:inline-block;padding:1px 12px;border-radius:99px;font-weight:800;font-size:14px;color:#fff}
+.chip.t{background:var(--forest)}.chip.f{background:var(--red)}
+.alert{background:#42232f;border-left:5px solid var(--red);padding:10px 14px;border-radius:10px;font-weight:800}
+.sol{list-style:none;padding:0;columns:2 300px}             /* lista da solução encontrada */
+.sol li{padding:3px 0 3px 22px;position:relative;font-size:15px}
+.sol li::before{position:absolute;left:0;font-weight:800}
+.sol .t::before{content:"✓";color:var(--teal)}.sol .f::before{content:"✗";color:var(--red)}.sol .f{color:var(--dim)}
+.st li{margin:10px 0}.st code,.st b{display:block}          /* passos da FNC */
+
+/* ---- Tabela de testes ---- */
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--teal)}.okc{color:var(--teal);font-weight:800}.noc{color:var(--red);font-weight:800}
+footer{text-align:center;color:var(--dim);font-size:14px;padding:10px 20px 40px;max-width:760px;margin:auto}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}} /* respeita quem desativa animações */
+</style>
+</head>
+<body>
+<header class="hero"><small>Lógica para Computação · Kit de lógica proposicional</small><h1>A Viagem de Chihiro</h1><p>Nove acontecimentos do filme, cinco restrições e um programa que testa todas as versões possíveis da história.</p><div class="hill"></div></header>
+<main>
+<!-- Seção 1: cartões das 9 variáveis (preenchidos pelo JavaScript, função build) -->
+<section class="panel"><h2><span>1</span>As nove variáveis</h2>
+<p class="lead">Cada variável é algo que pode acontecer no filme. Clique no botão para alternar entre verdadeiro e falso. Clique na imagem para trocar a figura.</p>
+<div class="row"><button class="btn" data-p="feliz">Cenário feliz</button><button class="btn alt" data-p="quebra">Cenário que quebra a regra</button></div>
+<div id="vars"></div></section>
+
+<!-- Seção 2 (R2): fórmulas impressas e avaliadas na valoração atual -->
+<section class="panel"><h2><span>2</span>Fórmulas, impressão e avaliação</h2>
+<p class="lead">As restrições são fórmulas construídas por código (árvore sintática com ¬, ∧, ∨, → e ↔), impressas em notação infixa e avaliadas na valoração escolhida acima.</p>
+<p id="val"></p><ul class="rules" id="av"></ul><p id="tot"></p></section>
+
+<!-- Seção 3 (R3, R5): busca por força bruta e solução em linguagem do problema -->
+<section class="panel"><h2><span>3</span>Busca de modelos por força bruta</h2>
+<p class="lead">O programa percorre as 2⁹ = 512 valorações, diz se a fórmula é válida, contingente ou insatisfatível, conta os modelos e mostra uma solução em linguagem do filme.</p>
+<div class="row"><button class="btn" data-w="possivel">Fatos: cenário possível</button><button class="btn alt" data-w="impossivel">Fatos: variante insatisfatível</button></div>
+<div id="bs"></div></section>
+
+<!-- Seção 4 (R4): conversão para forma normal conjuntiva -->
+<section class="panel"><h2><span>4</span>Conversão para FNC</h2><div id="fn"></div></section>
+
+<!-- Seção 5 (R6): testes automáticos -->
+<section class="panel"><h2><span>5</span>Testes</h2>
+<p class="lead">Casos com tautologia, contradição e fórmulas contingentes. Em cada um, a FNC gerada é comparada com a fórmula original pelas tabelas-verdade.</p>
+<div class="tw"><table id="tt"></table></div></section>
+</main>
+<footer>Para usar suas imagens, crie uma pasta <code>imagens</code> ao lado deste arquivo com <code>A.png</code>, <code>B.png</code> … <code>I.png</code>. Enquanto isso, aparece um emoji no lugar.</footer>
+<script>
+/* ================== CONFIGURAÇÃO BÁSICA ================== */
+const $=id=>document.getElementById(id);   // atalho para buscar elementos pelo id
+const L='ABCDEFGHI'.split('');             // as 9 variáveis proposicionais: A, B, ..., I
+const EXT='png';                           // extensão das imagens (mude para 'jpg' se preferir)
+// O que cada variável significa no filme (usado nos cartões e nas soluções)
+const NOME={A:'Chihiro acerta quem são os pais (porcos)',B:'Chihiro vai embora com os pais em forma humana',C:'Yubaba entrega o contrato',D:'Chihiro tem emprego',E:'Chihiro está salva',F:'Chihiro prende a respiração na ponte',G:'Chihiro come a frutinha',H:'Chihiro desaparece',I:'Chihiro esquece quem é e seus pais'};
+// Emoji que aparece enquanto a imagem da variável não existe
+const EMO={A:'🐷',B:'👪',C:'📜',D:'🧹',E:'✨',F:'🌉',G:'🍎',H:'👻',I:'🌫️'};
+
+/* ============ R1: ESTRUTURA DE DADOS (ÁRVORE SINTÁTICA) ============
+   Cada fórmula é um objeto: {t:tipo, ...filhos}.
+   t='v' é uma variável (campo n = nome); '¬' tem um filho (a);
+   '∧', '∨', '→', '↔' têm dois filhos (a e b).  */
+const V=n=>({t:'v',n}),Not=a=>({t:'¬',a}),And=(a,b)=>({t:'∧',a,b}),Or=(a,b)=>({t:'∨',a,b}),Imp=(a,b)=>({t:'→',a,b}),Iff=(a,b)=>({t:'↔',a,b});
+const [A,B,C,D,E,F,G,H,I]=L.map(V);       // cria uma fórmula-variável para cada letra
+
+/* ============ R2: IMPRESSÃO INFIXA E AVALIAÇÃO ============ */
+// Imprime a fórmula em notação infixa, com parênteses em cada operação binária.
+// 'top' = true remove os parênteses externos.
+const pr=(f,top)=>{
+  if(f.t==='v')return f.n;                    // variável: só o nome
+  if(f.t==='¬')return'¬'+pr(f.a);             // negação: ¬ antes do filho
+  const s=pr(f.a)+' '+f.t+' '+pr(f.b);        // binário: filho esquerdo, conectivo, filho direito
+  return top?s:'('+s+')'};
+// Avalia a fórmula f dada uma valoração v (objeto {A:true, B:false, ...}).
+const ev=(f,v)=>{switch(f.t){
+  case'v':return v[f.n];
+  case'¬':return!ev(f.a,v);
+  case'∧':return ev(f.a,v)&&ev(f.b,v);
+  case'∨':return ev(f.a,v)||ev(f.b,v);
+  case'→':return!ev(f.a,v)||ev(f.b,v);        // a→b só é falso quando a é V e b é F
+  default:return ev(f.a,v)===ev(f.b,v)}};     // '↔': verdadeiro quando os dois lados são iguais
+// Lista (sem repetição e em ordem) as variáveis que aparecem na fórmula.
+const vs=f=>f.t==='v'?[f.n]:[...new Set([...vs(f.a),...(f.b?vs(f.b):[])])].sort();
+
+/* ============ R3: BUSCA DE MODELOS POR FORÇA BRUTA ============ */
+// Gera todas as 2^n valorações possíveis das variáveis 'names'
+// (cada número de 0 a 2^n-1 é lido em binário: bit 0 = verdadeiro).
+const vals=names=>{const n=names.length,o=[];for(let i=0;i<1<<n;i++){const v={};names.forEach((x,k)=>v[x]=((i>>(n-1-k))&1)===0);o.push(v)}return o};
+// Testa a fórmula em todas as valorações; devolve o total, a lista de modelos
+// (valorações que a tornam verdadeira) e a classificação.
+const busca=(f,names=vs(f))=>{
+  const tot=1<<names.length,ms=vals(names).filter(v=>ev(f,v));
+  return{tot,ms,cls:ms.length===tot?'válida':ms.length?'contingente':'insatisfatível'}}; // todos / alguns / nenhum
+
+/* ============ R4: CONVERSÃO PARA FNC (3 PASSOS CLÁSSICOS) ============ */
+// Passo 1: elimina → e ↔ usando  a→b ≡ ¬a∨b   e   a↔b ≡ (¬a∨b)∧(¬b∨a).
+const sem=f=>{switch(f.t){
+  case'v':return f;
+  case'¬':return Not(sem(f.a));
+  case'∧':return And(sem(f.a),sem(f.b));
+  case'∨':return Or(sem(f.a),sem(f.b));
+  case'→':return Or(Not(sem(f.a)),sem(f.b));
+  default:{const a=sem(f.a),b=sem(f.b);return And(Or(Not(a),b),Or(Not(b),a))}}};
+// Passo 2: forma normal da negação: empurra ¬ até as variáveis (De Morgan e dupla negação).
+const nnf=f=>{
+  if(f.t==='v')return f;
+  if(f.t==='¬'){const g=f.a;
+    if(g.t==='v')return f;                                  // ¬p já está certo
+    if(g.t==='¬')return nnf(g.a);                           // ¬¬a ≡ a
+    if(g.t==='∧')return Or(nnf(Not(g.a)),nnf(Not(g.b)));    // ¬(a∧b) ≡ ¬a∨¬b
+    return And(nnf(Not(g.a)),nnf(Not(g.b)))}                // ¬(a∨b) ≡ ¬a∧¬b
+  return f.t==='∧'?And(nnf(f.a),nnf(f.b)):Or(nnf(f.a),nnf(f.b))};
+// Literais são textos: 'A' ou '¬A'. neg() devolve o literal oposto.
+const neg=l=>l[0]==='¬'?l.slice(1):'¬'+l;
+// Passo 3: distribuição de ∨ sobre ∧. Devolve uma lista de cláusulas (cada cláusula é uma lista de literais).
+const dist=f=>{
+  if(f.t==='v')return[[f.n]];
+  if(f.t==='¬')return[['¬'+f.a.n]];
+  const x=dist(f.a),y=dist(f.b);
+  return f.t==='∧'?x.concat(y)                              // ∧: junta as listas de cláusulas
+                  :x.flatMap(c=>y.map(d=>[...c,...d]))};    // ∨: combina cada cláusula de x com cada uma de y
+// Limpeza: tira literais repetidos, cláusulas tautológicas (p ∨ ¬p) e cláusulas duplicadas.
+const limpa=cs=>{const seen=new Set(),o=[];
+  for(let c of cs){c=[...new Set(c)].sort();
+    if(c.some(l=>c.includes(neg(l))))continue;
+    const k=c.join(',');if(!seen.has(k)){seen.add(k);o.push(c)}}
+  return o};
+const fnc=f=>limpa(dist(nnf(sem(f))));                      // pipeline completo: fórmula → lista de cláusulas
+// Avalia uma lista de cláusulas: todas as cláusulas precisam ter ao menos um literal verdadeiro.
+const evC=(cs,v)=>cs.every(c=>c.some(l=>l[0]==='¬'?!v[l.slice(1)]:v[l]));
+// Verifica equivalência comparando as duas tabelas-verdade linha a linha.
+const equiv=(f,cs)=>vals(vs(f)).every(v=>ev(f,v)===evC(cs,v));
+// Formata cláusulas para exibir, por exemplo: {¬G, ¬H}  {A, B}
+const cl=cs=>cs.map(c=>'{'+c.join(', ')+'}').join('  ');
+
+/* ============ R5: PROBLEMA-CONTEXTO (9 VARIÁVEIS, 5 RESTRIÇÕES) ============ */
+const R=[
+  Imp(G,Not(H)),                      // R1: G → ¬H   (quem come a frutinha não desaparece)
+  Imp(C,D),                           // R2: C → D    (receber o contrato leva a ter emprego)
+  Imp(H,Not(E)),                      // R3: H → ¬E   (quem desaparece não está salva)
+  Imp(I,Not(B)),                      // R4: I → ¬B   (esquecer quem é impede de ir embora)
+  // R5: a regra principal original: [({(G→¬H) ∧ [F ∨ (C→D)]} → E) ∧ A ∧ ¬I] → B
+  Imp(And(And(Imp(And(Imp(G,Not(H)),Or(F,Imp(C,D))),E),A),Not(I)),B)
+];
+
+// Descrições mostradas na tela, na mesma ordem de R
+const ROT=['R1 · Quem come a frutinha não desaparece','R2 · Receber o contrato leva a ter emprego','R3 · Quem desaparece não está salva','R4 · Esquecer quem é impede de ir embora com os pais','R5 · A regra principal do filme'];
+const W=R.reduce(And);                // as 5 restrições juntas: R1 ∧ R2 ∧ R3 ∧ R4 ∧ R5
+const bo=o=>Object.fromEntries(Object.entries(o).map(([k,b])=>[k,!!b])); // converte 1/0 em true/false
+
+// Valorações prontas dos botões da seção 1
+const PRE={feliz:bo({G:1,H:0,F:1,C:1,D:1,E:1,A:1,I:0,B:1}),quebra:bo({G:1,H:1,F:0,C:1,D:0,E:0,A:1,I:0,B:0})};
+
+// Fatos conhecidos nos dois cenários da seção 3; o segundo é a variante insatisfatível (B falso contradiz R5)
+const FATOS={possivel:bo({A:1,I:0,E:1}),impossivel:bo({A:1,I:0,E:1,B:0})};
+let cur={...PRE.feliz};               // valoração atual (muda quando o usuário clica nos cartões)
+
+
+/* ================== INTERFACE ================== */
+// Cria os 9 cartões (imagem + descrição + botão V/F) e liga os eventos.
+function build(){
+  $('vars').innerHTML=L.map(x=>`<article class="card" id="c${x}"><label class="ph" title="Clique para trocar a imagem"><img alt="${NOME[x]}" src="imagens/${x}.${EXT}" onload="this.parentNode.classList.add('has')" onerror="this.parentNode.classList.remove('has')"><span class="em">${EMO[x]}</span><input type="file" accept="image/*" hidden></label><div class="bd"><b class="lt">${x}</b><p>${NOME[x]}</p><button class="tg" data-x="${x}"></button></div></article>`).join('');
+  // clique no botão: inverte o valor da variável e redesenha
+  $('vars').onclick=e=>{const b=e.target.closest('.tg');if(b){cur[b.dataset.x]=!cur[b.dataset.x];upd()}};
+  // escolher arquivo: mostra a imagem na hora (só neste navegador, sem enviar a lugar nenhum)
+  $('vars').onchange=e=>{if(e.target.type==='file'&&e.target.files[0])e.target.closest('.ph').querySelector('img').src=URL.createObjectURL(e.target.files[0])};
+}
+
+// Atualiza cartões e a seção 2 (avaliação das restrições) para a valoração atual.
+function upd(){
+  L.forEach(x=>{const c=$('c'+x),t=cur[x],b=c.querySelector('.tg');
+    c.classList.toggle('on',t);c.classList.toggle('off',!t);
+    b.textContent=t?'V · aconteceu':'F · não aconteceu';b.setAttribute('aria-pressed',t)});
+  $('val').innerHTML='Valoração atual: <code>'+L.map(x=>x+'='+(cur[x]?'V':'F')).join('  ')+'</code>';
+  $('av').innerHTML=R.map((f,i)=>{const ok=ev(f,cur);       // avalia cada restrição
+    return`<li class="${ok?'ok':'no'}"><span class="mk">${ok?'✓':'✗'}</span><div><small>${ROT[i]}</small><code>${pr(f,1)}</code> = <b>${ok?'V':'F'}</b></div></li>`}).join('');
+  const n=R.filter(f=>ev(f,cur)).length;
+  $('tot').innerHTML=`<b>${n} de ${R.length}</b> restrições respeitadas — ${n===R.length?'esta versão do filme é possível.':'esta versão do filme quebra a regra.'}`;
+}
+
+// Seção 3: classifica, conta modelos e mostra a solução para o cenário de fatos 'w'.
+function buscaUI(w){
+  document.querySelectorAll('[data-w]').forEach(b=>b.classList.toggle('alt',b.dataset.w!==w));
+  const fa=FATOS[w],all=busca(W,L),r5=busca(R[4],L);
+  
+  // modelos de R1..R5 que também respeitam os fatos
+  const ms=all.ms.filter(v=>Object.entries(fa).every(([x,b])=>v[x]===b));
+  
+  // variáveis que têm o mesmo valor em todos esses modelos (as restrições "obrigam" esse valor)
+  const forc=L.filter(x=>!(x in fa)&&ms.length&&new Set(ms.map(v=>v[x])).size===1);
+  let h=`<p>Regra principal (R5) sozinha: <b>${r5.cls}</b>, com ${r5.ms.length} modelos entre ${r5.tot}.</p><p>Restrições R1 ∧ … ∧ R5: <b>${all.cls}</b>, com ${all.ms.length} modelos entre ${all.tot}.</p><p>Fatos informados: ${Object.entries(fa).map(([x,b])=>`<span class="chip ${b?'t':'f'}">${x} = ${b?'V':'F'}</span>`).join(' ')}</p>`;
+  if(!ms.length)h+='<p class="alert">IMPOSSÍVEL: nenhuma versão do filme respeita as 5 restrições com esses fatos (insatisfatível).</p>';
+  else{ // mostra o primeiro modelo encontrado, em frases do filme (não só V/F)
+    h+=`<p>Com os fatos: <b>${ms.length}</b> modelos (satisfatível). <b>Solução encontrada:</b></p><ul class="sol">${L.map(x=>`<li class="${ms[0][x]?'t':'f'}">${ms[0][x]?'Aconteceu':'Não aconteceu'}: ${NOME[x]}</li>`).join('')}</ul>`;
+    if(forc.length)h+='<p>O que as restrições obrigam: '+forc.map(x=>`${NOME[x]} (${ms[0][x]?'V':'F'})`).join('; ')+'.</p>'}
+  $('bs').innerHTML=h;
+}
+
+// Seção 4: mostra cada passo da conversão de R5 e a FNC do conjunto completo.
+function fncUI(){
+  const f=R[4],e=sem(f),n=nnf(e),cs=fnc(f),cw=fnc(W);
+  $('fn').innerHTML=`<p class="lead">Passos clássicos aplicados à regra principal (R5):</p><ol class="st"><li><b>Eliminar → e ↔</b><code>${pr(e,1)}</code></li><li><b>Forma normal da negação</b> (De Morgan e dupla negação)<code>${pr(n,1)}</code></li><li><b>Distribuição</b> de ∨ sobre ∧, em lista de cláusulas<code>${cl(cs)}</code></li></ol><p>${cs.length} cláusulas · equivalente à original? <b>${equiv(f,cs)?'sim ✓':'não ✗'}</b> (512 linhas comparadas)</p><p class="lead">FNC de todas as restrições juntas (R1 ∧ … ∧ R5):</p><code>${cl(cw)}</code><p>${cw.length} cláusulas · equivalente? <b>${equiv(W,cw)?'sim ✓':'não ✗'}</b></p>`;
+}
+
+/* ============ R6: TESTES ============
+   Cada teste: [nome, fórmula, classificação esperada]. */
+const [p,q,r]=['p','q','r'].map(V);
+const TS=[
+  ['Tautologia',Or(p,Not(p)),'válida'],
+  ['Contradição',And(p,Not(p)),'insatisfatível'],
+  ['Contingente',Imp(p,q),'contingente'],
+  ['De Morgan (tautologia)',Iff(Not(And(p,q)),Or(Not(p),Not(q))),'válida'],
+  ['Bicondicional contraditório',And(Iff(p,q),Not(Imp(p,q))),'insatisfatível'],
+  ['Contingente com três variáveis',Iff(Imp(p,q),r),'contingente'],
+  ['Regra principal do filme (R5)',R[4],'contingente']];
+// Roda cada teste: classifica por força bruta, gera a FNC e compara as tabelas-verdade.
+function testes(){
+  $('tt').innerHTML='<tr><th>#</th><th>Teste</th><th>Esperado</th><th>Obtido</th><th>FNC</th><th>FNC ≡ original</th><th></th></tr>'+TS.map(([n,f,e],i)=>{
+    const o=busca(f),cs=fnc(f),eq=equiv(f,cs),ok=o.cls===e&&eq;   // passa se classificou certo E a FNC é equivalente
+    return`<tr><td>${i+1}</td><td><b>${n}</b><br><code>${pr(f,1)}</code></td><td>${e}</td><td>${o.cls}</td><td><code>${cl(cs)||'(vazia = verdadeira)'}</code></td><td>${eq?'sim':'não'}</td><td class="${ok?'okc':'noc'}">${ok?'✔ passou':'✘ falhou'}</td></tr>`}).join('');
+}
+
+/* ================== INICIALIZAÇÃO ================== */
+build();upd();buscaUI('possivel');fncUI();testes();   // desenha tudo ao abrir a página
+// botões "Cenário feliz" / "Cenário que quebra a regra"
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{cur={...PRE[b.dataset.p]};upd()});
+// botões de fatos da seção 3
+document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>buscaUI(b.dataset.w));
+</script>
+</body>
+</html>
