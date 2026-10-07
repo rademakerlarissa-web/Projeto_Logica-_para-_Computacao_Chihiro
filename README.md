@@ -3,7 +3,7 @@
 
 Projeto da disciplina **Lógica para Computação**: um pequeno "kit de lógica proposicional" programado em JavaScript e aplicado a um problema-contexto inspirado no filme *A Viagem de Chihiro* (Studio Ghibli).
 
-🔗 **Site publicado:** [l](https://)ink
+🔗 **Site publicado:** [https://rademakerlarissa-web.github.io/Projeto_Logica-_para-_Computacao_Chihiro/]((https://rademakerlarissa-web.github.io/Projeto_Logica-_para-_Computacao_Chihiro/))
 
 👥 **Grupo:** Larissa Rademaker Gabriel, Alessandro dos Santos, Yuri Kauã e Matheus Rodrigues Silva.
 
